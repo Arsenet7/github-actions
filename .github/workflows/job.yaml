@@ -1,0 +1,21 @@
+name: CI Pipeline 
+ 
+# Trigger workflow on push or pull request events 
+on: 
+  push: 
+    branches: 
+      - main 
+  pull_request: 
+    branches: 
+      - main 
+ 
+# Define the jobs 
+jobs: 
+  build: 
+    runs-on: self-hosted # Use the latest Ubuntu runner 
+    steps: 
+      - uses: actions/checkout@v3  # Checkout the repository code 
+      - name: Set up Node.js 
+        uses: actions/setup-node@v3 
+        with: 
+          node-version: '14'
