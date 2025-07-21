@@ -1,0 +1,53 @@
+name: CI Pipeline
+
+# Trigger workflow on push or pull request
+on:
+  push:
+    branches:
+      - main
+      - arsene
+  pull_request:
+    branches:
+      - main
+      - arsene
+
+jobs:
+  build:
+    runs-on: self-hosted
+    if: github.ref == 'refs/heads/main'  # Limit this job to 'main' branch
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+
+  install-docker:
+    runs-on: self-hosted
+    if: github.ref == 'refs/heads/arsene'  # Only run this job on 'arsene' branch
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ca-certificates \
+            curl \
+            gnupg \
+            lsb-release
+
+          sudo mkdir -p /etc/apt/keyrings
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+          echo \
+            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+            $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+          sudo apt-get update
+          sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+      - name: Verify Docker installation
+        run: docker --version
